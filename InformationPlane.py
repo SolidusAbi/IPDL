@@ -27,15 +27,6 @@ class MutualInformation(nn.Module):
         distance = torch.cdist(x, x)
         return torch.exp(-(distance**2)/(sigma**2))
     
-    # def RBF(self, x, sigma):
-    #     if len(x.shape) < 2:
-    #         x = x.reshape(1, len(x))
-
-    #     a = x.expand((torch.numel(x), torch.numel(x)))
-    #     b = x.T.expand((torch.numel(x), torch.numel(x)))
-    #     euclidean_norm = torch.sqrt((a[:,] - b[:,])**2)
-    #     return torch.exp(-euclidean_norm/(sigma**2))
-
     '''
         Kernel Aligment Loss Function.
 
