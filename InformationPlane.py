@@ -15,9 +15,9 @@ class TensorKernel:
         distance = torch.cdist(x, x)
         return torch.exp(-(distance**2)/(sigma**2))
 
-class MatrixBasedEntropy:
+class MatrixBasedRenyisEntropy:
     @staticmethod
-    def renyisEntropy(A : np.array):
+    def entropy(A : np.array):
         w, _ = LA.eig(A)
         epsilon = 1e-10
         w += epsilon
@@ -26,7 +26,14 @@ class MatrixBasedEntropy:
     @staticmethod
     def jointEntropy(A_x : np.array, A_y : np.array):
         aux = A_x*A_y
-        return matrixRenyiEntropy(aux/np.trace(aux))
+        return MatrixBasedRenyisEntropy.entropy(aux/np.trace(aux))
+
+    @staticmethod
+    def mutualInformation(A_x : np.array, A_y : np.array):
+        o = MatrixBasedRenyisEntropy.entropy(A_x)
+        p = MatrixBasedRenyisEntropy.entropy(A_y)
+        q = MatrixBasedRenyisEntropy.jointEntropy(A_x, A_y)
+        return (o + p - q)
 
 class MutualInformation(nn.Module):
     '''
