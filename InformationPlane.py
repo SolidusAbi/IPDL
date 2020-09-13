@@ -16,7 +16,7 @@ class TensorKernel:
         return torch.exp(-(distance**2)/(sigma**2))
 
 
-class MatrixBasedRenyisEntropy:
+class MatrixBasedRenyisEntropy():
     @staticmethod
     def entropy(A : np.array):
         w, _ = LA.eig(A)
@@ -36,8 +36,12 @@ class MatrixBasedRenyisEntropy:
         joint_entropy_AxAy = MatrixBasedRenyisEntropy.jointEntropy(Ax, Ay)
         return (entropy_Ax + entropy_Ay - joint_entropy_AxAy)
 
+    @staticmethod
+    def tensorRBFMatrix(x, sigma):
+        return TensorKernel.RBF(x, sigma) / len(x)
 
-class TensorRBFMatrix(nn.module):
+
+class TensorRBFMatrix(nn.Module):
     def __init__(self):
         self.sigma = None
 
@@ -102,9 +106,6 @@ class RKHSMatrixOptimizer():
 
 class InformationPlane(nn.Module):
     '''
-        param step: number of steps in order to reduce the number of possible sigma 
-        values.
-
         @param input_kernel: preprocessed input kernel matrix
         @param input_kernel: preprocessed label kernel matrix
         @param sigma_values: number of possible sigma values for optimizing process.
@@ -144,6 +145,9 @@ class InformationPlane(nn.Module):
         original_shape = x.shape
         x = x.flatten(1)
 
+        for idx in range(0, len(x), step=self.mini_batch_size):
+            batch = x[idx:idx+self.mini_batch_size]
+            A = self.tensorRBFMatrix(batch)
         # Dividir en minibatchs
         # Utilizar el optimizador
         # Obtener la matrix A con el valor de sigma optimizado (self.tensorRBFMatrix(x, sigma))
