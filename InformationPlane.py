@@ -43,6 +43,7 @@ class MatrixBasedRenyisEntropy():
 
 class TensorRBFMatrix(nn.Module):
     def __init__(self):
+        super(TensorRBFMatrix, self).__init__()
         self.sigma = None
 
     '''
@@ -112,15 +113,36 @@ class InformationPlane(nn.Module):
         @param step: indicates the number of step for reducing the number of possible sigma values
     '''
     def __init__(self, mini_batch_size, input_kernel, label_kernel_matrix):
+        super(InformationPlane, self).__init__()
         self.input_kernel = input_kernel
         self.label_kernel = label_kernel_matrix
 
         self.mini_batch_size = mini_batch_size
         self.sigma_optimizer = RKHSMatrixOptimizer(label_kernel_matrix, beta=0.5)
-        self.At = TensorRBFMatrix()
 
         self.Ixt = []
         self.Ity = []
+
+    '''
+        @param beta regularizer term to stabilize the optimal sigma value across the previous iteration
+        
+        @return mutual information with label {I(X,T), I(T,Y)}
+    '''
+    def forward(self, x, beta=0.5):
+        original_shape = x.shape
+        x = x.flatten(1)
+
+        print(len(x))
+        for idx in range(0, len(x), step=self.mini_batch_size):
+            batch = x[idx:idx+self.mini_batch_size]
+            A = self.tensorRBFMatrix(batch, 0.2)
+            print(A)
+        # Dividir en minibatchs
+        # Utilizar el optimizador
+        # Obtener la matrix A con el valor de sigma optimizado (self.tensorRBFMatrix(x, sigma))
+
+        x = x.reshape(original_shape)
+        return x
 
     ''' 
         @return Mutual Information {I(X,T), I(T,Y)}
@@ -136,24 +158,6 @@ class InformationPlane(nn.Module):
     def tensorRBFMatrix(self, x, sigma):
         return TensorKernel.RBF(x, sigma) / len(x)
 
-    '''
-        @param beta regularizer term to stabilize the optimal sigma value across the previous iteration
-        
-        @return mutual information with label {I(X,T), I(T,Y)}
-    '''
-    def forward(self, x, beta=0.5):
-        original_shape = x.shape
-        x = x.flatten(1)
-
-        for idx in range(0, len(x), step=self.mini_batch_size):
-            batch = x[idx:idx+self.mini_batch_size]
-            A = self.tensorRBFMatrix(batch)
-        # Dividir en minibatchs
-        # Utilizar el optimizador
-        # Obtener la matrix A con el valor de sigma optimizado (self.tensorRBFMatrix(x, sigma))
-
-        x = x.reshape(original_shape)
-        return x
    
     # '''
     #     Kernel Aligment Loss Function.
