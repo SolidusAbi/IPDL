@@ -13,7 +13,7 @@ class TensorKernel:
     @staticmethod
     def RBF(x, sigma):
         distance = torch.cdist(x, x)
-        return torch.exp(-(distance**2)/(sigma**2))
+        return torch.exp(-(distance**2)/(sigma**2)).cpu()
 
 
 class MatrixBasedRenyisEntropy():
@@ -36,6 +36,11 @@ class MatrixBasedRenyisEntropy():
         joint_entropy_AxAy = MatrixBasedRenyisEntropy.jointEntropy(Ax, Ay)
         return (entropy_Ax + entropy_Ay - joint_entropy_AxAy)
 
+    '''
+        Generates the 'A' matrix based on RBF kernel
+
+        @return 'A' matrix
+    '''
     @staticmethod
     def tensorRBFMatrix(x, sigma):
         return TensorKernel.RBF(x, sigma) / len(x)
