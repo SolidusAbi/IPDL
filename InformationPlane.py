@@ -60,13 +60,17 @@ class TensorRBFMatrix(nn.Module):
 
 
 class RKHSMatrixOptimizer():
-    def __init__(self, label_kernel_matrix, beta=0.5):
+    def __init__(self, beta=0.5):
         if not(0 <= beta <= 1):
             raise Exception('beta must be in the range [0, 1]')
 
         self.beta = beta
-        self.Ky = label_kernel_matrix
         self.sigma = None
+        self.sigma_tmp = [] #Just for saving sigma values
+
+    # Temporal, just for testing
+    def getSigmaValues(self):
+        return self.sigma_tmp
 
     def getSigma(self):
         return self.sigma
@@ -76,9 +80,9 @@ class RKHSMatrixOptimizer():
         @param label_kernel_matrix
         @param n_sigmas
     '''
-    def step(self, layer_output, n_sigmas=75):
-        sigma_t = optimize(layer_output, n_sigmas)
-        self.sigma = ( (beta*self.sigma) + ((1-beta)*sigma_t) ) if not(self.sigma is None) else sigma_t
+    def step(self, layer_output, Ky, n_sigmas=75):
+        sigma_t = self.optimize(layer_output, Ky, n_sigmas)
+        self.sigma = ( (self.beta*self.sigma) + ((1-self.beta)*sigma_t) ) if not(self.sigma is None) else sigma_t
         return self.getSigma()
 
     '''
@@ -90,13 +94,14 @@ class RKHSMatrixOptimizer():
 
         [Descripción del procedimiento]
     '''
-    def optimize(self, layer_output, n_sigmas):
+    def optimize(self, layer_output, Ky, n_sigmas):
         distance = torch.cdist(layer_output, layer_output)
-        mean_distance = distance[distance != 0].mean()
+        mean_distance = distance[distance != 0].mean().detach().cpu()
         sigma_values = np.arange(mean_distance*0.1, mean_distance*10, (mean_distance*10 - mean_distance*0.1)/n_sigmas)
 
-        Kt = list( map(lambda sigma: TensorKernel.RBF(layer_output, sigma), sigma_values.tolist()) )
-        loss = np.array( list( map(lambda k: self.kernelAligmentLoss(k, self.Ky), Kt) ) )
+        Kt = list( map(lambda sigma: TensorKernel.RBF(layer_output, sigma).detach(), sigma_values.tolist()) )
+        loss = np.array( list( map(lambda k: self.kernelAligmentLoss(k, Ky), Kt) ) )
+        self.sigma_tmp.append(sigma_values[ np.argwhere(loss == loss.max()).item(0) ])
         return sigma_values[ np.argwhere(loss == loss.max()).item(0) ]
 
     '''
@@ -110,21 +115,18 @@ class RKHSMatrixOptimizer():
         
 
 
-class InformationPlane(nn.Module):
+class InformationPlane(torch.nn.Module):
     '''
         @param input_kernel: preprocessed input kernel matrix
         @param input_kernel: preprocessed label kernel matrix
         @param sigma_values: number of possible sigma values for optimizing process.
         @param step: indicates the number of step for reducing the number of possible sigma values
     '''
-    def __init__(self, mini_batch_size, input_kernel, label_kernel_matrix):
+    def __init__(self, mini_batch_size, beta=0.5):
         super(InformationPlane, self).__init__()
-        self.input_kernel = input_kernel
-        self.label_kernel = label_kernel_matrix
 
         self.mini_batch_size = mini_batch_size
-        self.sigma_optimizer = RKHSMatrixOptimizer(label_kernel_matrix, beta=0.5)
-
+        self.sigma_optimizer = RKHSMatrixOptimizer(beta)
         self.Ixt = []
         self.Ity = []
 
@@ -133,18 +135,33 @@ class InformationPlane(nn.Module):
         
         @return mutual information with label {I(X,T), I(T,Y)}
     '''
-    def forward(self, x, beta=0.5):
+    def forward(self, x, input, label, beta=0.5):
         original_shape = x.shape
         x = x.flatten(1)
 
-        print(len(x))
-        for idx in range(0, len(x), step=self.mini_batch_size):
+        Ixt = [] # Mutual Information with input I(X, T)
+        Ity = [] # Mutual Information with label I(T, Y)
+
+        # Dividir en minibatchs [x]
+        # Utilizar el optimizador [x]
+        # Obtener la matrix A con el valor de sigma optimizado [x]
+
+        for idx in range(0, len(x), self.mini_batch_size):
             batch = x[idx:idx+self.mini_batch_size]
-            A = self.tensorRBFMatrix(batch, 0.2)
-            print(A)
-        # Dividir en minibatchs
-        # Utilizar el optimizador
-        # Obtener la matrix A con el valor de sigma optimizado (self.tensorRBFMatrix(x, sigma))
+            input_batch = input[idx:idx+self.mini_batch_size].flatten(1)
+            label_batch = label[idx:idx+self.mini_batch_size]
+            label_kernel_matrix = TensorKernel.RBF(label_batch, 0.1)
+            
+            self.sigma_optimizer.step(batch, label_kernel_matrix, 50)            
+
+            A = MatrixBasedRenyisEntropy.tensorRBFMatrix(batch, self.sigma_optimizer.getSigma()).detach()
+            Ay = MatrixBasedRenyisEntropy.tensorRBFMatrix(label_batch, 0.1).detach()
+            Ax = MatrixBasedRenyisEntropy.tensorRBFMatrix(input_batch, 8).detach()
+            Ixt.append(MatrixBasedRenyisEntropy.mutualInformation(Ax, A))
+            Ity.append(MatrixBasedRenyisEntropy.mutualInformation(A, Ay))
+
+        self.Ixt.append(np.array(Ixt).mean())
+        self.Ity.append(np.array(Ity).mean())
 
         x = x.reshape(original_shape)
         return x
@@ -154,41 +171,3 @@ class InformationPlane(nn.Module):
     '''
     def getMutualInformation(self):
         return self.Ixt, self.Ity
-
-    '''
-        Generates the 'A' matrix based on RBF kernel
-
-        @return 'A' matrix
-    '''
-    def tensorRBFMatrix(self, x, sigma):
-        return TensorKernel.RBF(x, sigma) / len(x)
-
-   
-    # '''
-    #     Kernel Aligment Loss Function.
-
-    #     This function is used in order to obtain the optimal sigma parameter from
-    #     RBF kernel.  
-    # '''
-    # def kernelAligmentLoss(self, x, y):
-    #     return (torch.sum(x*y))/(torch.norm(x) * torch.norm(y))
-
-    # '''
-    #     This function is used in orter to obtain the optimal kernel width for
-    #     an L DNN layer
-
-    #     @param x
-    #     @param n_sigmas: number of possible sigma values
-
-    #     [Descripción del procedimiento]
-    # '''
-    # def optimizeSigmaValue(self, x, n_sigmas=75):
-    #     distance = torch.cdist(x, x)
-    #     mean_distance = distance[distance != 0].mean()
-    #     sigma_values = np.arange(mean_distance*0.1, mean_distance*10, (mean_distance*10 - mean_distance*0.1)/n_sigmas)
-        
-    #     rbf_result = list( map(lambda sigma: TensorKernel.RBF(x, sigma), sigma_values.tolist()) )
-    #     loss = np.array( list( map(lambda x: self.kernelAligmentLoss(x, self.label_kernel), rbf_result) ) )
-    #     optimal_sigma_value = sigma_values[ np.argwhere(loss == loss.max()).item() ]
-
-    #     return optimal_sigma_value
