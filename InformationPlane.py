@@ -1,7 +1,9 @@
 import torch
 import numpy as np
 from torch import nn
-from numpy import linalg as LA
+# from numpy import linalg as LA
+from scipy import linalg
+
 
 class TensorKernel:
     '''
@@ -19,8 +21,9 @@ class TensorKernel:
 class MatrixBasedRenyisEntropy():
     @staticmethod
     def entropy(A : np.array):
-        w, _ = LA.eig(A)
-        epsilon = 1e-6
+        # w, _ = LA.eig(A)
+        w = linalg.eigh(A, eigvals_only=True)
+        epsilon = 1e-5
         w += epsilon
         return -np.sum(w * np.log2(w))
 
