@@ -23,7 +23,7 @@ class MatrixBasedRenyisEntropy():
     def entropy(A : np.array):
         # w, _ = LA.eig(A)
         w = linalg.eigh(A, eigvals_only=True)
-        epsilon = 1e-5
+        epsilon = 1e-6
         w += epsilon
         return -np.sum(w * np.log2(w))
 
