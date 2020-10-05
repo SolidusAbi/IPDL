@@ -40,9 +40,15 @@ class MyMNIST():
         
     def __getitem__(self, idx):
         if self.training:
-            return (self.train_set[0][idx], self.train_set[1][idx])
+            img, target = self.train_set[0][idx], self.train_set[1][idx]
         else:
-            return (self.eval_set[0][idx], self.eval_set[1][idx])
+            img, target = self.eval_set[0][idx], self.eval_set[1][idx]
+
+        img = Image.fromarray(img.numpy(), mode='L')
+        img = self.transformToTensor(img)
+
+        return img, target
+
 
     def eval(self):
         self.training = False
