@@ -15,7 +15,8 @@ class TensorKernel:
     @staticmethod
     def RBF(x, sigma):
         distance = torch.cdist(x, x)
-        return torch.exp(-(distance**2)/(sigma**2)).cpu()
+        return torch.exp(-(distance**2)/(sigma)).cpu()
+        # return torch.exp(-(distance**2)/(sigma**2)).cpu()
 
 
 class MatrixBasedRenyisEntropy():
@@ -23,7 +24,7 @@ class MatrixBasedRenyisEntropy():
     def entropy(A : np.array):
         # w, _ = LA.eig(A)
         w = linalg.eigh(A, eigvals_only=True)
-        epsilon = 1e-6
+        epsilon = 1e-16
         w += epsilon
         return -np.sum(w * np.log2(w))
 
