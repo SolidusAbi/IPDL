@@ -17,7 +17,8 @@ class MyMNIST():
     @param dataset_path: Path where is located the dataset.
     '''
     def __init__(self, train_set_split = 0.75):
-        self.transformToTensor = Compose([ ToTensor(), Normalize((0.1307,), (0.3081,))])
+        # self.transformToTensor = Compose([ ToTensor(), Normalize((0.1307,), (0.3081,))])
+        self.transformToTensor = Compose([ ToTensor()])
         self.transformToImage = Compose([ Normalize((-0.1307/0.3081,), (1/0.3081,)), ToPILImage()])
         dir_path = os.path.dirname(os.path.realpath(__file__))
         dataset = MNIST(os.path.join(dir_path, "MNIST"), train=True, download=True, transform=self.transformToTensor)

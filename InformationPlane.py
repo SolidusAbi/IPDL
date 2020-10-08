@@ -15,8 +15,7 @@ class TensorKernel:
     @staticmethod
     def RBF(x, sigma):
         distance = torch.cdist(x, x)
-        return torch.exp(-(distance**2)/(sigma)).cpu()
-        # return torch.exp(-(distance**2)/(sigma**2)).cpu()
+        return torch.exp(-distance**2 /(sigma**2)).cpu()
 
 
 class MatrixBasedRenyisEntropy():
@@ -24,8 +23,9 @@ class MatrixBasedRenyisEntropy():
     def entropy(A : np.array):
         # w, _ = LA.eig(A)
         w = linalg.eigh(A, eigvals_only=True)
-        epsilon = 1e-16
-        w += epsilon
+        print(w)
+        # epsilon = 1e-16
+        # w += epsilon
         return -np.sum(w * np.log2(w))
 
     @staticmethod
@@ -47,19 +47,6 @@ class MatrixBasedRenyisEntropy():
     '''
     @staticmethod
     def tensorRBFMatrix(x, sigma):
-        return TensorKernel.RBF(x, sigma) / len(x)
-
-
-class TensorRBFMatrix(nn.Module):
-    def __init__(self):
-        super(TensorRBFMatrix, self).__init__()
-        self.sigma = None
-
-    '''
-        @param x
-        @param beta regularizer term to stabilize the optimal sigma value across the previous iteration
-    '''
-    def forward(self, x, sigma):
         return TensorKernel.RBF(x, sigma) / len(x)
 
 
