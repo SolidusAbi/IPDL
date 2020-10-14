@@ -1,4 +1,7 @@
 from matplotlib import pyplot as plt
+from torch import Tensor
+from torch.nn.functional import one_hot
+from torch.distributions.dirichlet import Dirichlet
 
 def showMutualInformation(net):
     with plt.style.context('seaborn'):
@@ -31,3 +34,9 @@ def showMutualInformation(net):
         cb.set_label("Iterations", labelpad=-18)
 
         plt.show()
+
+def one_hot_dirichlet(x: Tensor, num_classes=-1):
+    labels = one_hot(x, num_classes=num_classes).float()
+    labels = (labels * 10000) + 100
+    distribution = Dirichlet(labels)
+    return distribution.sample()
