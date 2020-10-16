@@ -1,3 +1,4 @@
+import numpy as np
 from matplotlib import pyplot as plt
 from torch import Tensor
 from torch.nn.functional import one_hot
@@ -40,3 +41,8 @@ def one_hot_dirichlet(x: Tensor, num_classes=-1):
     labels = (labels * 10000) + 100
     distribution = Dirichlet(labels)
     return distribution.sample()
+
+def moving_average(a, n=10) :
+    ret = np.cumsum(a, dtype=float)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n

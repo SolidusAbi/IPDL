@@ -1,17 +1,17 @@
 import torch
 from torch import nn
 from torch import Tensor
-
+from InformationPlane import InformationPlane
 
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
 
-        self.layer1_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer2_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer3_IP = InformationPlane(beta=0.1, n_sigmas=150 )
-        self.layer4_IP = InformationPlane(beta=0.1, n_sigmas=150 )
-        self.fc_IP = InformationPlane(beta=0.1, n_sigmas=150)
+        self.layer1_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer2_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer3_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer4_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.fc_IP = InformationPlane(beta=0.1, n_sigmas=200)
 
 
         self.layer1 = nn.Sequential(
@@ -69,11 +69,11 @@ class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
 
-        self.layer1_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer2_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer3_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer4_IP = InformationPlane(beta=0.1, n_sigmas=150)
-        self.layer5_IP = InformationPlane(beta=0.1, n_sigmas=150)
+        self.layer1_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer2_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer3_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer4_IP = InformationPlane(beta=0.1, n_sigmas=200)
+        self.layer5_IP = InformationPlane(beta=0.1, n_sigmas=200)
 
         self.layer1 = nn.Sequential(
             nn.Linear(784, 1024),
