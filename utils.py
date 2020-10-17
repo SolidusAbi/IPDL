@@ -4,11 +4,16 @@ from torch import Tensor
 from torch.nn.functional import one_hot
 from torch.distributions.dirichlet import Dirichlet
 
-def showMutualInformation(net):
-    with plt.style.context('seaborn'):
-        ips = net.getInformationPlaneLayers()
-        colors = ['Reds', 'Blues', 'binary', 'Greens', 'Oranges']
+'''
+    Colors: https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
+    Ex:
+        colors = ['Reds', 'Blues', 'binary', 'Greens', 'Oranges']   
+'''
+def showMutualInformation(ip_layers: list, colors: list):
+    if len(ip_layers) > len(colors):
+        raise ValueError("Each layer needs a color")
 
+    with plt.style.context('seaborn'):
         fig = plt.figure(constrained_layout=False)
         gs1 = fig.add_gridspec(nrows=1, ncols=1, left=0.05, right=0.84, wspace=0.05)
         gs2 = fig.add_gridspec(nrows=1, ncols=5, left=0.85, right=0.95, wspace=0)
@@ -16,7 +21,7 @@ def showMutualInformation(net):
         f8_ax1.set_xlabel("I(X, T)")
         f8_ax1.set_ylabel("I(T, Y)")
 
-        for idx, ip in enumerate(ips):
+        for idx, ip in enumerate(ip_layers):
             cmap = plt.cm.get_cmap(colors[idx])
             Ixt, Ity = ip.getMutualInformation()
             Ixt = moving_average(Ixt)
