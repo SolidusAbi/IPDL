@@ -16,7 +16,7 @@ def showMutualInformation(ip_layers: list, colors: list):
     with plt.style.context('seaborn'):
         fig = plt.figure(constrained_layout=False)
         gs1 = fig.add_gridspec(nrows=1, ncols=1, left=0.05, right=0.84, wspace=0.05)
-        gs2 = fig.add_gridspec(nrows=1, ncols=5, left=0.85, right=0.95, wspace=0)
+        gs2 = fig.add_gridspec(nrows=1, ncols=len(ip_layers), left=0.85, right=0.95, wspace=0)
         f8_ax1 = fig.add_subplot(gs1[:, :])
         f8_ax1.set_xlabel("I(X, T)")
         f8_ax1.set_ylabel("I(T, Y)")
