@@ -13,8 +13,9 @@ class TensorKernel:
     '''
     @staticmethod
     def RBF(x: Tensor, sigma: float) -> Tensor:
-        distance = torch.cdist(x, x)
-        return torch.exp(-distance**2 / (sigma**2) )
+        pairwise_difference = (torch.unsqueeze(x,1) - torch.unsqueeze(x,0))**2
+        distance = torch.sum(pairwise_difference, dim=2)
+        return torch.exp(-distance / (2*(sigma**2)) )
 
 
 class MatrixBasedRenyisEntropy():
