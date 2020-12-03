@@ -15,29 +15,29 @@ class MLP(nn.Module):
 
         self.layer1 = nn.Sequential(
             nn.Linear(784, 1024),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=True),
             self.layer1_IP,
         )
 
         self.layer2 = nn.Sequential(
             nn.Linear(1024, 20),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(20),
+            nn.ReLU(inplace=True),
             self.layer2_IP
         )
         
         self.layer3 = nn.Sequential(
             nn.Linear(20, 20),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(20),
+            nn.ReLU(inplace=True),
             self.layer3_IP
         )
 
         self.layer4 = nn.Sequential(
             nn.Linear(20, 20),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(20),
+            nn.ReLU(inplace=True),
             self.layer4_IP
         )
 
