@@ -15,6 +15,7 @@ class TensorKernel:
     def RBF(x: Tensor, sigma: float) -> Tensor:
         pairwise_difference = (torch.unsqueeze(x,1) - torch.unsqueeze(x,0))**2
         distance = torch.sum(pairwise_difference, dim=2)
+        # distance = torch.cdist(x, x)
         return torch.exp(-distance / (2*(sigma**2)) )
 
 
@@ -170,9 +171,12 @@ class InformationPlane(torch.nn.Module):
         @param x: Batch tensor
     '''
     def getPossibleSigmaValues(self, x: Tensor) -> list:
-        distance = torch.cdist(x, x)
-        mean_distance = distance[~torch.eye(len(distance), dtype=bool)].mean().item()
-        return torch.linspace(0.1, mean_distance*10, self.n_sigmas).tolist()
+        distance = torch.cdist(x,x)
+        distance = distance[torch.triu(torch.ones(distance.shape, dtype=torch.bool), diagonal=1)] 
+        return torch.linspace(0.1, 10*distance.mean(), self.n_sigmas).tolist()
+        # distance = torch.cdist(x, x)
+        # mean_distance = distance[~torch.eye(len(distance), dtype=bool)].mean().item()
+        # return torch.linspace(0.1, mean_distance*10, self.n_sigmas).tolist()
 
     def moving_average(x: Tensor, n=10) -> Tensor :
         ret = torch.cumsum(x, dtype=float)
