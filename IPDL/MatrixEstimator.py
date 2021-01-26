@@ -1,5 +1,6 @@
+import torch
 from torch import Tensor, nn
-from . import TensorKernel
+from InformationPlane import TensorKernel
 
 class MatrixEstimator(nn.Module):
     def __init__(self, sigma = 0.1):
@@ -38,3 +39,38 @@ class MatrixEstimator(nn.Module):
 
     def __repr__(self) -> str:
         return "MatrixEstimator(sigma={:.2f})".format(self.sigma)
+
+
+
+### TEST (Esto debería ponerlo en otro fichero) ###
+def test():
+    from torch import nn
+
+    model = nn.Sequential(
+        nn.Identity(),
+        MatrixEstimator(8),
+        nn.Identity(),
+        MatrixEstimator(0.5),
+        nn.Identity(),
+        MatrixEstimator(0.100001)
+    )
+    model.eval()
+    
+    x = torch.rand(10, 10)
+    y = model(x)
+
+    Ax_0 = TensorKernel.RBF(x, sigma=8) / x.size(0)
+    Ax_1 = TensorKernel.RBF(x, sigma=0.5) / x.size(0)
+    Ax_2 = TensorKernel.RBF(x, sigma=0.100001) / x.size(0)
+
+    case_0 = all((model[1].get_matrix() == Ax_0).flatten())
+    print("Test 0: {}".format(case_0))
+
+    case_1 = all((model[3].get_matrix() == Ax_1).flatten())
+    print("Test 1: {}".format(case_1))
+
+    case_2 = all((model[5].get_matrix() == Ax_2).flatten())
+    print("Test 2: {}".format(case_2))
+
+if __name__ == "__main__":
+        test()
