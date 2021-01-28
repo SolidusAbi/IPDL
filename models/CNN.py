@@ -82,16 +82,16 @@ class CNN2(nn.Module):
             nn.Conv2d(4, 8, 3, stride=1, padding=0),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(8),
+            nn.MaxPool2d(2, stride=2, ceil_mode=True),
             MatrixEstimator(0.5),
-            nn.MaxPool2d(2, stride=2, ceil_mode=True)
         )
 
         self.layer3 = nn.Sequential(
             nn.Conv2d(8, 16, 3, stride=1, padding=0),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(16),
+            nn.MaxPool2d(2, stride=2, ceil_mode=True),
             MatrixEstimator(0.5),
-            nn.MaxPool2d(2, stride=2, ceil_mode=True)
         )
 
         self.fc = nn.Sequential(

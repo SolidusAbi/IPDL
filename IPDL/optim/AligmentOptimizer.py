@@ -47,7 +47,7 @@ class AligmentOptimizer():
         for idx, matrix_estimator in enumerate(self.matrix_estimators):
             activation = nn.Softmax() if idx == len(self.matrix_estimators)-1 else nn.Identity()
 
-            x = activation(matrix_estimator.x.flatten(1)).to(device)
+            x = activation(matrix_estimator.x).to(device)
             sigma_values = self.getPossibleSigmaValues(x, self.n_sigmas)
 
             Kt = list( map(lambda sigma: TensorKernel.RBF(x, sigma), sigma_values) )    

@@ -17,7 +17,7 @@ class MatrixEstimator(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         if not self.training:
-            self.x = x.detach().cpu() # To CPU in order to save memory on GPU
+            self.x = x.detach().flatten(1).cpu() # To CPU in order to save memory on GPU
 
         return x
 
@@ -33,9 +33,9 @@ class MatrixEstimator(nn.Module):
         n = self.x.size(0)
         
         if not(activation is None):
-            return (TensorKernel.RBF(activation(self.x).flatten(1).to(device), self.sigma) / n)
+            return (TensorKernel.RBF(activation(self.x).to(device), self.sigma) / n)
         else:
-            return (TensorKernel.RBF(self.x.flatten(1).to(device), self.sigma) / n)
+            return (TensorKernel.RBF(self.x.to(device), self.sigma) / n)
 
     def __repr__(self) -> str:
         return "MatrixEstimator(sigma={:.2f})".format(self.sigma)
