@@ -1,5 +1,10 @@
+import torch
 from torch import Tensor, nn
 from .MatrixEstimator import MatrixEstimator
+from .InformationTheory import TensorKernel
+import numpy as np
+
+# Será necesario crear varios optimizadores.... está mal planteado el InformationPlane
 
 class MatrixOptimizer():
     def __init__(self, model: nn.Module, beta=0.5, n_sigmas=300):

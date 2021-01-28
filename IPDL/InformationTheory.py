@@ -42,7 +42,7 @@ class MatrixBasedRenyisEntropy():
         return (entropy_Ax + entropy_Ay - joint_entropy)
 
 
-
+    # To remove!
     @staticmethod
     def tensorRBFMatrix(x: Tensor, sigma: float) -> Tensor:
         '''

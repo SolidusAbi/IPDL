@@ -1,6 +1,6 @@
 import torch
 from torch import Tensor, nn
-from InformationPlane import TensorKernel
+from .InformationTheory import TensorKernel
 
 class MatrixEstimator(nn.Module):
     def __init__(self, sigma = 0.1):

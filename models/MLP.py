@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch import Tensor
 from IPDL import InformationPlane
+from IPDL.MatrixEstimator import MatrixEstimator
 
 class MLP(nn.Module):
     def __init__(self):
@@ -65,6 +66,61 @@ class MLP(nn.Module):
 
     def getInformationPlaneLayers(self) -> list:
         return [self.layer1_IP, self.layer2_IP, self.layer3_IP, self.layer4_IP, self.layer5_IP]
+
+    def weight_init(self, module):
+        if isinstance(module, nn.Linear) or isinstance(module, nn.Conv2d):
+            nn.init.kaiming_normal_(module.weight.data, nonlinearity='relu')
+
+
+class MLP2(nn.Module):
+    def __init__(self):
+        super(MLP2, self).__init__()
+
+        self.layer1 = nn.Sequential(
+            nn.Linear(784, 1024),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(1024),
+            MatrixEstimator(0.5),
+        )
+
+        self.layer2 = nn.Sequential(
+            nn.Linear(1024, 20),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(20),
+            MatrixEstimator(0.5),
+        )
+        
+        self.layer3 = nn.Sequential(
+            nn.Linear(20, 20),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(20),
+            MatrixEstimator(0.5),
+        )
+
+        self.layer4 = nn.Sequential(
+            nn.Linear(20, 20),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(20),
+            MatrixEstimator(0.5),
+        )
+
+        self.layer5 = nn.Sequential(
+            nn.Linear(20, 10),
+            MatrixEstimator(0.5),
+        )
+
+
+        for m in self.modules():
+            self.weight_init(m)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
+
+        return x
 
     def weight_init(self, module):
         if isinstance(module, nn.Linear) or isinstance(module, nn.Conv2d):
