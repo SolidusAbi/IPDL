@@ -33,7 +33,7 @@ class ClassificationInformationPlane(InformationPlane):
     def __init__(self, model: nn.Module, use_softmax=True):
         '''
             @param model: model where 
-            @param softmax: include a softmax layer at the end of the model. It is usefull 
+            @param use_softmax: include a softmax layer at the end of the model. It is usefull 
                 if your model does not contain this layer. 
         '''
         super(ClassificationInformationPlane, self).__init__()
@@ -52,13 +52,13 @@ class ClassificationInformationPlane(InformationPlane):
     
     def computeMutualInformation(self, Ax: Tensor, Ay: Tensor):
         for idx, matrix_estimator in enumerate(self.matrices_per_layers):
-            activation = nn.Softmax() if self.use_softmax and idx == len(self.matrices_per_layers)-1 else None
+            activation = nn.Softmax(dim=1) if self.use_softmax and idx == len(self.matrices_per_layers)-1 else None
 
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix(activation)).cpu())
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(activation), Ay).cpu())
 
 '''
-    No tested!! (see IPAE, maybe it's not necessary)
+    No tested!! (see IPAE, probably it's not necessary)
 '''
 class AutoEncoderInformationPlane(InformationPlane):
     def __init__(self, model: nn.Module):

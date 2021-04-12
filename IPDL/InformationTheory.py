@@ -44,7 +44,7 @@ class MatrixBasedRenyisEntropy():
 
     # To remove!
     @staticmethod
-    def tensorRBFMatrix(x: Tensor, sigma: float) -> Tensor:
+    def matrix_estimator(x: Tensor, sigma: float) -> Tensor:
         '''
             Generates the 'A' matrix based on RBF kernel
 

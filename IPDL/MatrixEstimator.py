@@ -7,7 +7,7 @@ class MatrixEstimator(nn.Module):
         super(MatrixEstimator, self).__init__()
         
         self.sigma = nn.Parameter(torch.tensor(sigma), requires_grad=False)
-        self.x = torch.rand((10, 1))
+        self.x = torch.rand((10, 1)) # Dummy!
 
     def set_sigma(self, sigma: float) -> None:
         self.sigma.data = torch.tensor(sigma)
@@ -17,7 +17,8 @@ class MatrixEstimator(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         if not self.training:
-            self.x = x.detach().cpu() # To CPU in order to save memory on GPU
+            # Move to CPU just for saving memory on GPU
+            self.x = x.detach().cpu() 
 
         return x
 
