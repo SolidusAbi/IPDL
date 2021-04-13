@@ -69,14 +69,14 @@ class AutoEncoderInformationPlane(InformationPlane):
             if isinstance(module, (MatrixEstimator)):
                 self.matrices_per_layers.append(module)
         
-        for i in range(len(self.matrices_per_layers)-2):
+        for i in range(len(self.matrices_per_layers)-1):
             self.Ixt.append([])
             self.Ity.append([])
 
-    def computeMutualInformation(self):
-        Ax = self.matrices_per_layers[0].A
-        Ay = self.matrices_per_layers[-1].A
+    def computeMutualInformation(self, Ax: Tensor):
+        # Ax = self.matrices_per_layers[0].get_matrix()
+        Ay = self.matrices_per_layers[-1].get_matrix()
 
-        for idx, matrix_estimator in enumerate(self.matrices_per_layers[1:-1]):
+        for idx, matrix_estimator in enumerate(self.matrices_per_layers[0:-1]):
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix()).cpu())
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(), Ay).cpu())
