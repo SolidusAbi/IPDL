@@ -3,14 +3,16 @@ from torch import Tensor, nn
 from .InformationTheory import TensorKernel
 
 class MatrixEstimator(nn.Module):
-    def __init__(self, sigma = 0.1):
+    def __init__(self, sigma = 0.1, required_optim = True):
         super(MatrixEstimator, self).__init__()
         
         self.sigma = nn.Parameter(torch.tensor(sigma), requires_grad=False)
         self.x = torch.rand((10, 1)) # Dummy!
+        self.required_optim = required_optim
 
     def set_sigma(self, sigma: float) -> None:
-        self.sigma.data = torch.tensor(sigma)
+        if self.required_optim:
+            self.sigma.data = torch.tensor(sigma)
 
     def get_sigma(self) -> float:
         return self.sigma.data.item()
@@ -21,6 +23,7 @@ class MatrixEstimator(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         if not self.training:
             # Move to CPU just for saving memory on GPU
+            # (dar una vuelta a ver si realmente vale la pena)
             self.x = x.detach().flatten(1).cpu()
 
         return x
