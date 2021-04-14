@@ -15,6 +15,9 @@ class MatrixEstimator(nn.Module):
     def get_sigma(self) -> float:
         return self.sigma.data.item()
 
+    def get_device(self) -> str:
+        return self.sigma.device
+
     def forward(self, x: Tensor) -> Tensor:
         if not self.training:
             # Move to CPU just for saving memory on GPU

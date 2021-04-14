@@ -1,29 +1,11 @@
-import torch
 import numpy as np
-
+import torch
 from torch import Tensor, nn
-from IPDL import MatrixEstimator
+
 from IPDL.InformationTheory import TensorKernel
-
-class MatrixOptimizer():
-    '''
-        Abstract which is used in order to update the sigma values
-        in MatrixEstimator.
-    '''
-    def __init__(self, model: nn.Module):
-        self.matrix_estimators = []
-        for module in model.modules():
-            if isinstance(module, (MatrixEstimator)):
-                self.matrix_estimators.append(module)
-
-    def step(self, Ky: Tensor) -> None:
-        self.__optimize(Ky)
-        
-    def __optimize(self, Ky: Tensor) -> None:
-        raise NotImplementedError("optimize process is not implemented")
+from .MatrixOptimizer import MatrixOptimizer
 
 
-# Crear clase abstracta de optimizadores?
 class AligmentOptimizer(MatrixOptimizer):
     '''
         Optimizer based on Kernel Aligment optimizer. This optimizer just works for
@@ -43,10 +25,8 @@ class AligmentOptimizer(MatrixOptimizer):
         for idx, matrix_estimator in enumerate(self.matrix_estimators):
             self.sigma_prev[idx] = [matrix_estimator.get_sigma()]
    
-    def step(self, Ky: Tensor) -> None:
-        self.__optimize(Ky)
 
-    def __optimize(self, Ky: Tensor) -> None:
+    def _optimize(self, Ky: Tensor) -> None:
         '''
             This function is used in orter to obtain the optimal kernel width for
             an T DNN layer

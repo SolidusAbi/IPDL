@@ -1,12 +1,18 @@
 # from IPDL import MatrixBasedRenyisEntropy as renyis
 from torch import Tensor, nn
+from abc import ABC, abstractmethod
 from .MatrixEstimator import MatrixEstimator
 from .InformationTheory import MatrixBasedRenyisEntropy as renyis
 
 from .utils import moving_average as mva
 
-class InformationPlane():
-    def __init__(self):
+class InformationPlane(ABC):
+    def __init__(self, model: nn.Module):
+        self.matrix_estimators = []
+        for module in model.modules():
+            if isinstance(module, (MatrixEstimator)):
+                self.matrix_estimators.append(module)
+
         self.Ixt = [] # Mutual Information I(X,T)
         self.Ity = [] # Mutual Information I(T,Y)
 
@@ -18,8 +24,9 @@ class InformationPlane():
             filter_Ity = list(map(lambda Ity: mva(Ity, moving_average_n), self.Ity))
             return filter_Ixt, filter_Ity
 
-    def computeMutualInformation(self, Ax: Tensor, Ay: Tensor):
-        raise NotImplementedError("Please Implement this method")
+    @abstractmethod
+    def computeMutualInformation(self, *args):
+        pass
 
 
 class ClassificationInformationPlane(InformationPlane):
@@ -32,51 +39,42 @@ class ClassificationInformationPlane(InformationPlane):
 
     def __init__(self, model: nn.Module, use_softmax=True):
         '''
-            @param model: model where 
+            @param model: model which contains matrix estimators
             @param use_softmax: include a softmax layer at the end of the model. It is usefull 
-                if your model does not contain this layer. 
+                if your model does not contain this layer.
         '''
-        super(ClassificationInformationPlane, self).__init__()
-        self.matrices_per_layers = []
-        self.use_softmax = use_softmax
-      
-        # First element corresponds to input A matrix and last element
-        # is the output A matrix
-        for module in model.modules():
-            if isinstance(module, (MatrixEstimator)):
-                self.matrices_per_layers.append(module)
+        super(ClassificationInformationPlane, self).__init__(model)
 
-        for i in range(len(self.matrices_per_layers)):
+        self.use_softmax = use_softmax
+
+        for i in range(len(self.matrix_estimators)):
             self.Ixt.append([])
             self.Ity.append([])
     
     def computeMutualInformation(self, Ax: Tensor, Ay: Tensor):
-        for idx, matrix_estimator in enumerate(self.matrices_per_layers):
-            activation = nn.Softmax(dim=1) if self.use_softmax and idx == len(self.matrices_per_layers)-1 else None
+        for idx, matrix_estimator in enumerate(self.matrix_estimators):
+            activation = nn.Softmax(dim=1) if self.use_softmax and idx == len(self.matrix_estimators)-1 else None
 
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix(activation)).cpu())
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(activation), Ay).cpu())
 
-'''
-    No tested!! (see IPAE, probably it's not necessary)
-'''
-class AutoEncoderInformationPlane(InformationPlane):
-    def __init__(self, model: nn.Module):
-        super(AutoEncoderInformationPlane, self).__init__()
-        self.matrices_per_layers = []
 
-        for module in model.modules():
-            if isinstance(module, (MatrixEstimator)):
-                self.matrices_per_layers.append(module)
+class AutoEncoderInformationPlane(InformationPlane):
+    '''
+       Computes Mutual Information to generate a Information Plane for AutoEncoders architectures.
+
+       The matrix Ay is directly the model's output.
+    '''
+    def __init__(self, model: nn.Module):
+        super(AutoEncoderInformationPlane, self).__init__(model)
         
-        for i in range(len(self.matrices_per_layers)-1):
+        for i in range(len(self.matrix_estimators)-1):
             self.Ixt.append([])
             self.Ity.append([])
 
     def computeMutualInformation(self, Ax: Tensor):
-        # Ax = self.matrices_per_layers[0].get_matrix()
-        Ay = self.matrices_per_layers[-1].get_matrix()
+        Ay = self.matrix_estimators[-1].get_matrix()
 
-        for idx, matrix_estimator in enumerate(self.matrices_per_layers[0:-1]):
+        for idx, matrix_estimator in enumerate(self.matrix_estimators[0:-1]):
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix()).cpu())
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(), Ay).cpu())
