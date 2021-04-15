@@ -3,16 +3,16 @@ from torch import Tensor, nn
 from .InformationTheory import TensorKernel
 
 class MatrixEstimator(nn.Module):
-    def __init__(self, sigma = 0.1, required_optim = True):
+    def __init__(self, sigma = 0.1, requires_optim = True):
         super(MatrixEstimator, self).__init__()
         
         self.sigma = nn.Parameter(torch.tensor(sigma), requires_grad=False)
         self.x = torch.rand((10, 1)) # Dummy!
-        self.required_optim = required_optim
+        self.requires_optim = requires_optim
 
     def set_sigma(self, sigma: float) -> None:
-        if self.required_optim:
-            self.sigma.data = torch.tensor(sigma)
+        if self.requires_optim:
+            self.sigma.data = torch.tensor(sigma, device=self.sigma.device)
 
     def get_sigma(self) -> float:
         return self.sigma.data.item()
@@ -38,14 +38,14 @@ class MatrixEstimator(nn.Module):
         '''
         device = self.sigma.device # To the device where parameters are located
         n = self.x.size(0)
-        
+
         if not(activation is None):
             return (TensorKernel.RBF(activation(self.x).to(device), self.sigma) / n)
         else:
             return (TensorKernel.RBF(self.x.to(device), self.sigma) / n)
 
     def __repr__(self) -> str:
-        return "MatrixEstimator(sigma={:.2f})".format(self.sigma)
+        return "MatrixEstimator(sigma={:.2f}, requires_optim={})".format(self.sigma, self.requires_optim)
 
 
 
