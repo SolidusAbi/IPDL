@@ -1,10 +1,7 @@
-# from IPDL import MatrixBasedRenyisEntropy as renyis
 from torch import Tensor, nn
 from abc import ABC, abstractmethod
 from .MatrixEstimator import MatrixEstimator
 from .InformationTheory import MatrixBasedRenyisEntropy as renyis
-
-from .utils import moving_average as mva
 
 class InformationPlane(ABC):
     def __init__(self, model: nn.Module):
@@ -17,6 +14,8 @@ class InformationPlane(ABC):
         self.Ity = [] # Mutual Information I(T,Y)
 
     def getMutualInformation(self, moving_average_n = 0):
+        from .utils import moving_average as mva
+
         if moving_average_n == 0:
             return self.Ixt, self.Ity
         else:

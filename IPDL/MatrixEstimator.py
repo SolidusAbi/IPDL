@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor, nn
+from torch.nn.functional import batch_norm
 from .InformationTheory import TensorKernel
 
 class MatrixEstimator(nn.Module):
@@ -24,11 +25,11 @@ class MatrixEstimator(nn.Module):
         if not self.training:
             # Move to CPU just for saving memory on GPU
             # (dar una vuelta a ver si realmente vale la pena)
-            self.x = x.detach().flatten(1).cpu()
+            self.x = x.detach().clone().flatten(1).cpu()
 
         return x
 
-    def get_matrix(self, activation= None) -> Tensor:
+    def get_matrix(self, activation = None) -> Tensor:
         '''
             Return matrix A
 
@@ -37,12 +38,12 @@ class MatrixEstimator(nn.Module):
                 the Information Plane.
         '''
         device = self.sigma.device # To the device where parameters are located
-        n = self.x.size(0)
-
+        n = self.x.size(0)       
+        x = self.x.clone().to(device)
         if not(activation is None):
-            return (TensorKernel.RBF(activation(self.x).to(device), self.sigma) / n)
-        else:
-            return (TensorKernel.RBF(self.x.to(device), self.sigma) / n)
+            x = activation(x)
+
+        return (TensorKernel.RBF(x, self.sigma) / n)
 
     def __repr__(self) -> str:
         return "MatrixEstimator(sigma={:.2f}, requires_optim={})".format(self.sigma, self.requires_optim)
