@@ -72,8 +72,16 @@ class AutoEncoderInformationPlane(InformationPlane):
             self.Ity.append([])
 
     def computeMutualInformation(self, Ax: Tensor):
+        '''
+            Compute the Mutual Information. 
+
+            return two list which represents the Ixt and Ity
+            in the different layers.
+        '''
         Ay = self.matrix_estimators[-1].get_matrix()
 
         for idx, matrix_estimator in enumerate(self.matrix_estimators[0:-1]):
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix()))
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(), Ay))
+
+        return list(map(lambda x: x[-1], self.Ixt)), list(map(lambda x: x[-1], self.Ity))
