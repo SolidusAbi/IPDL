@@ -25,7 +25,7 @@ class MatrixEstimator(nn.Module):
         if not self.training:
             # Move to CPU just for saving memory on GPU
             # (dar una vuelta a ver si realmente vale la pena)
-            self.x = x.detach().clone().flatten(1).cpu()
+            self.x = x.detach().clone().cpu()
 
         return x
 
@@ -39,7 +39,7 @@ class MatrixEstimator(nn.Module):
         '''
         device = self.sigma.device # To the device where parameters are located
         n = self.x.size(0)       
-        x = self.x.clone().to(device)
+        x = self.x.flatten(1).to(device)
         if not(activation is None):
             x = activation(x)
 

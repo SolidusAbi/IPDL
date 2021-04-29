@@ -30,7 +30,7 @@ class SilvermanOptimizer(MatrixOptimizer):
             x = (matrix_estimator.x).to(device)
 
             n = x.size(0)
-            d = x.size(1) if len(x.shape) == 2 else reduce(lambda x, y: x*y, x.shape[1:])
+            d = x.size(1) if len(x.shape) == 2 else reduce(lambda x, y: x*y, x.shape[2:])
             
             sigma = self.gamma * (n ** (-1 / (4 + d)))
             if self.normalize:
