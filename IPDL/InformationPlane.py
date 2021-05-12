@@ -57,6 +57,8 @@ class ClassificationInformationPlane(InformationPlane):
             self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix(activation)).cpu())
             self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(activation), Ay).cpu())
 
+        return list(map(lambda x: x[-1], self.Ixt)), list(map(lambda x: x[-1], self.Ity))
+
 
 class AutoEncoderInformationPlane(InformationPlane):
     '''
