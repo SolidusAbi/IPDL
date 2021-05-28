@@ -1,5 +1,7 @@
+import numpy as np
 from torch import Tensor, nn
 from abc import ABC, abstractmethod
+from pandas import DataFrame, MultiIndex
 from .MatrixEstimator import MatrixEstimator
 from .InformationTheory import MatrixBasedRenyisEntropy as renyis
 
@@ -22,6 +24,23 @@ class InformationPlane(ABC):
             filter_Ixt = list(map(lambda Ixt: mva(Ixt, moving_average_n), self.Ixt))
             filter_Ity = list(map(lambda Ity: mva(Ity, moving_average_n), self.Ity))
             return filter_Ixt, filter_Ity
+
+    def to_df(self):
+        Ixt = np.array(self.Ixt)
+        Ity = np.array(self.Ity)
+        index_names = [
+                list(map(lambda x: 'Layer {}'.format(x), np.repeat(np.arange(len(Ixt)), 2)+1 )),
+                ['Ixt', 'Ity']*len(Ixt)
+            ]
+        
+        tuples = list(zip(*index_names))
+        index = MultiIndex.from_tuples(tuples)
+        MI = np.zeros((Ixt.shape[1], Ixt.shape[0]*2), dtype=np.float)
+        MI[:, 0::2] = Ixt.T
+        MI[:, 1::2] = Ity.T
+
+        return DataFrame(MI, columns=index)
+
 
     @abstractmethod
     def computeMutualInformation(self, *args):
