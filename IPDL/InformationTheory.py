@@ -19,7 +19,7 @@ class MatrixBasedRenyisEntropy():
     @staticmethod
     def entropy(A: Tensor) -> float:
         eigv = torch.symeig(A)[0].abs()
-        epsilon = 1e-12
+        epsilon = 1e-8
         eigv += epsilon 
         return -torch.sum(eigv*(torch.log2(eigv)))
 
