@@ -46,7 +46,7 @@ class AligmentOptimizer(MatrixOptimizer):
             Kt = list( map(lambda sigma: TensorKernel.RBF(x, sigma), sigma_values) )    
             
             loss = np.array( list( map(lambda k: self.__kernelAligmentLoss(k, Ky), Kt) ) )
-            best_sigma = sigma_values[ np.argwhere(loss == loss.max()).item(0) ]
+            best_sigma = sigma_values[ np.argwhere(loss == np.nanmax(loss)).item(0) ]
             
             best_sigma = ( (self.beta*best_sigma) + ((1-self.beta)*matrix_estimator.get_sigma()) )
             
