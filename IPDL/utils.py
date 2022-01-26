@@ -27,8 +27,8 @@ def showMutualInformation(ip: InformationPlane, moving_average_n = 15, colors: l
         gs1 = fig.add_gridspec(nrows=1, ncols=1, left=0.05, right=0.84, wspace=0.05)
         gs2 = fig.add_gridspec(nrows=1, ncols=len(Ixts), left=0.85, right=0.95, wspace=0)
         f8_ax1 = fig.add_subplot(gs1[:, :])
-        f8_ax1.set_xlabel("I($X$, $T$)")
-        f8_ax1.set_ylabel("I($T$, $Y$)")
+        f8_ax1.set_xlabel("I($X$; $T$)", fontsize=13)
+        f8_ax1.set_ylabel("I($T$; $Y$)", fontsize=13)
 
         for idx, Ixt in enumerate(Ixts):
             Ity = Itys[idx]
@@ -45,7 +45,7 @@ def showMutualInformation(ip: InformationPlane, moving_average_n = 15, colors: l
 
     f8_ax1.legend()
     cb.set_ticks([0, iterations.max()])
-    cb.set_label("Iterations", labelpad=-18)
+    cb.set_label("Iterations", labelpad=-18, fontsize=13)
 
     plt.show()
 

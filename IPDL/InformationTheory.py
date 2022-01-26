@@ -18,10 +18,10 @@ class TensorKernel:
 class MatrixBasedRenyisEntropy():
     @staticmethod
     def entropy(A: Tensor) -> float:
-        eigv = torch.symeig(A)[0].abs()
+        eigval, _ = torch.linalg.eigh(A)        
         epsilon = 1e-8
-        eigv += epsilon 
-        return -torch.sum(eigv*(torch.log2(eigv)))
+        eigval = eigval.abs() + epsilon 
+        return -torch.sum(eigval*(torch.log2(eigval)))
 
     @staticmethod
     def jointEntropy(*args: Tensor) -> float:
