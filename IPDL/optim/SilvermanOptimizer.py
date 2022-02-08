@@ -6,7 +6,7 @@ from .MatrixOptimizer import MatrixOptimizer
 
 class SilvermanOptimizer(MatrixOptimizer):
     '''
-        A simplified approach of Silverman’s rule of thumb for Gaussian kernels.
+        A simplified approach of Silverman's rule of thumb for Gaussian kernels.
         This class is based on the approach proposed in "On the Information
         Plane of Autoencoders". 
 

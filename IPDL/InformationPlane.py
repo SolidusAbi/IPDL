@@ -3,7 +3,7 @@ from torch import Tensor, nn
 from abc import ABC, abstractmethod
 from pandas import DataFrame, MultiIndex
 from .MatrixEstimator import MatrixEstimator
-from .InformationTheory import MatrixBasedRenyisEntropy as renyis
+from .InformationTheory import KernelBasedEstimator as estimator
 
 class InformationPlane(ABC):
     def __init__(self, model: nn.Module):
@@ -73,8 +73,8 @@ class ClassificationInformationPlane(InformationPlane):
         for idx, matrix_estimator in enumerate(self.matrix_estimators):
             activation = nn.Softmax(dim=1) if self.use_softmax and idx == len(self.matrix_estimators)-1 else None
 
-            self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix(activation)).cpu())
-            self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(activation), Ay).cpu())
+            self.Ixt[idx].append(estimator.mutualInformation(Ax, matrix_estimator.get_matrix(activation)).cpu())
+            self.Ity[idx].append(estimator.mutualInformation(matrix_estimator.get_matrix(activation), Ay).cpu())
 
         return list(map(lambda x: x[-1], self.Ixt)), list(map(lambda x: x[-1], self.Ity))
 
@@ -102,7 +102,7 @@ class AutoEncoderInformationPlane(InformationPlane):
         Ay = self.matrix_estimators[-1].get_matrix()
 
         for idx, matrix_estimator in enumerate(self.matrix_estimators[0:-1]):
-            self.Ixt[idx].append(renyis.mutualInformation(Ax, matrix_estimator.get_matrix()).cpu())
-            self.Ity[idx].append(renyis.mutualInformation(matrix_estimator.get_matrix(), Ay).cpu())
+            self.Ixt[idx].append(estimator.mutualInformation(Ax, matrix_estimator.get_matrix()).cpu())
+            self.Ity[idx].append(estimator.mutualInformation(matrix_estimator.get_matrix(), Ay).cpu())
 
         return list(map(lambda x: x[-1], self.Ixt)), list(map(lambda x: x[-1], self.Ity))
