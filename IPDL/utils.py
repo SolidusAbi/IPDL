@@ -69,12 +69,12 @@ def show_ip(ip_df: pd.DataFrame, n=25, labels=[], moving_average_n=25):
         gs1 = fig.add_gridspec(nrows=1, ncols=1, left=0.08, right=0.84, wspace=0.05)
         gs2 = fig.add_gridspec(nrows=1, ncols=len(ip_df.keys()[::2]), left=0.85, right=0.95, wspace=0)
         f8_ax1 = fig.add_subplot(gs1[:, :])
-        f8_ax1.set_xlabel("I($X$, $T$)", fontsize=14)
-        f8_ax1.set_ylabel("I($T$, $Y$)", fontsize=14)
+        f8_ax1.set_xlabel("$\mathcal{I}(X; T)$", fontsize=14)
+        f8_ax1.set_ylabel("$\mathcal{I}(T; Y)$", fontsize=14)
 
         for idx, (layer, _) in enumerate(ip_df.columns[::2]):
-            Ity = moving_average(ip_df[layer]['Ity'].to_numpy(), n=moving_average_n, padding_size=int(moving_average_n*0.2))
-            Ixt = moving_average(ip_df[layer]['Ixt'].to_numpy(), n=moving_average_n, padding_size=int(moving_average_n*0.2))
+            Ity = moving_average(ip_df[layer]['Ity'].to_numpy(), n=moving_average_n, padding_size=int(moving_average_n))
+            Ixt = moving_average(ip_df[layer]['Ixt'].to_numpy(), n=moving_average_n, padding_size=int(moving_average_n))
             
             cmap = plt.cm.get_cmap(colors[idx])
             iterations = np.geomspace(1, len(Ity)-1, num=n, dtype=np.uint)
