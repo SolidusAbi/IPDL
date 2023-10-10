@@ -46,7 +46,7 @@ class MatrixEstimator(nn.Module):
         return (TensorKernel.RBF(x, self.sigma) / n)
 
     def __repr__(self) -> str:
-        return "MatrixEstimator(sigma={:.2f}, requires_optim={})".format(self.sigma, self.requires_optim)
+        return "MatrixEstimator(sigma={:.2f}, requires_optim={})".format(self.sigma.item(), self.requires_optim)
 
 
 
