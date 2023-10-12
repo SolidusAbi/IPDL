@@ -35,7 +35,7 @@ class InformationPlane(ABC):
         
         tuples = list(zip(*index_names))
         index = MultiIndex.from_tuples(tuples)
-        MI = np.zeros((Ixt.shape[1], Ixt.shape[0]*2), dtype=np.float)
+        MI = np.zeros((Ixt.shape[1], Ixt.shape[0]*2), dtype=float)
         MI[:, 0::2] = Ixt.T
         MI[:, 1::2] = Ity.T
 
